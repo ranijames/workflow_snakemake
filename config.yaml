@@ -1,0 +1,238 @@
+general:
+    samples: 'samples.tsv'
+    conditions: 'conditions.tsv'
+    cancertype: 'SKCM'
+    strandedness: 'no'
+    picard_strand: 'NONE'
+    delete_bam: False
+
+    paths:
+        samples_list: 'samples.txt'
+        fastqdir: '/cluster/work/grlab/projects/tmp_andre/test_snakemake_small/fastq'
+        outdir: 'test/results'
+        logdir: 'test/logs'
+        workdir: '/cluster/work/grlab/projects/tmp_tinu/debug_ratschlab_snakemake/check_changes/workflows-rna_seq_star'
+        genome: '/cluster/work/grlab/projects/GTEx/genome/hg19_hs37d5/genome.fa'
+        star_genome: '/cluster/work/grlab/projects/tmp_andre/test_snakemake_small/genome_index'
+        annotation: '/cluster/work/grlab/projects/GTEx/annotation/gencode.v19.annotation.hs37d5_chr.coding.spladder.gtf'
+        #rna-seqc_tool: '/cluster/home/aalva/rnaseqc.v2.3.2.linux'
+        #annotation_collapsed: '/cluster/work/grlab/projects/coukos_immuno/annotation/gencode.v28lift37.collapse_annotation.gtf'
+        rsem_reference: "/cluster/work/grlab/projects/tmp_tinu/resources/rsem_ref_new/hg19_hs37d5"
+        ref_flat: '/cluster/work/grlab/projects/tmp_tinu/resources/nexus_icgc/gencode.v19.annotation.hs37d5_chr.gp'
+        ref_gene: '/cluster/work/grlab/projects/tmp_tinu/resources/nexus_icgc/gencode.v19.annotation.hs37d5_chr.bed'
+        burden_anno_junction_db: '/cluster/work/grlab/projects/TCGA/PanCancer/annotation/gencode.v19.annotation.hs37d5_chr.junctions.hdf5'
+        burden_outgroup_junction_db: '/cluster/work/grlab/projects/tmp_andre/tupro/resources/gtex_junction_db.hdf5' 
+        tcga_neojunctions: '/cluster/work/grlab/projects/tmp_andre/tupro/resources/tss_complexity_counts.whitelisted.G0.01.globsum20.conf3_neojunctions.tsv.gz'
+        tcga_neojunction_counts: '/cluster/work/grlab/projects/tmp_andre/tupro/resources/tss_complexity_counts.whitelisted.G0.01.globsum20.conf3_neojunction_counts.tsv'
+        tcga_metadata: '/cluster/work/grlab/projects/tmp_andre/tupro/resources/full_metadata.overlap_RNA_WXS.RNA.tsv'
+        tcga_expression: '/cluster/work/grlab/projects/tmp_andre/tupro/resources/hif_sig_expr.tsv'
+        tcga_gtex_hypo_scores: 'resources/hypoxia/tcga_gtex_hypoxia_scores.tsv'
+    diffexp:
+        contrasts:
+            groupA: "disease"
+            groupB: "control"
+tools:
+    STAR:
+        call: "STAR"
+        scratch: 10000
+        mem: 10000
+        time: 1440
+        threads: 8
+        sjdbOverhang: 100
+        otherParams: "--outFilterMultimapScoreRange 1 \
+                      --outFilterMultimapNmax 20 \
+                      --outFilterMismatchNmax 10 \
+                      --alignIntronMax 500000 \
+                      --alignMatesGapMax 1000000 \
+                      --sjdbScore 2 \
+                      --alignSJDBoverhangMin 1 \
+                      --genomeLoad NoSharedMemory \
+                      --readFilesCommand zcat \
+                      --outFilterMatchNminOverLread 0.33 \
+                      --outFilterScoreMinOverLread 0.33 \
+                      --outSAMstrandField intronMotif \
+                      --outSAMmode Full \
+                      --limitBAMsortRAM 7000000000 \
+                      --outSAMattributes NH HI NM MD AS XS \
+                      --outSAMunmapped Within \
+                      --limitSjdbInsertNsj 2000000 \
+                      --outSAMtype BAM Unsorted \
+                      --outSAMheaderHD @HD VN:1.4 \
+                      --outSAMmultNmax 1"
+        passmodeParams: "--twopassMode Basic"
+        quantmodeParams: "--quantMode TranscriptomeSAM"
+    STAR_index:
+        scratch: 10000
+        mem: 10000
+        time: 300
+        threads: 8
+        sjdbOverhang: 100
+        otherParams: "--runMode genomeGenerate"
+    fastqc:
+        call: "fastqc"
+        scratch: 2000
+        mem: 2000
+        time: 120
+        threads: 2
+    rnaseqc:
+        call: "rnaseqc"
+        scratch: 2000
+        mem: 2000
+        time: 120
+        threads: 2
+    multiqc:
+        call: "multiqc"
+        config: 'multiqc_config.yaml' 
+        scratch: 2000
+        mem: 2000
+        time: 120
+        threads: 2
+    deseq2_limma:
+        call: "deseq2_limma"
+        scratch: 2000
+        mem: 2000
+        time: 120
+    spladder:
+        call: "spladder"
+        mem: 8000
+        time: 300
+        threads: 2
+        confidence: 2
+        readlen: 50
+        otherParams: "--primary-only \
+                      --no-extract-ase \
+                      --sparse-bam"
+    samtools:
+        mem: 2000
+        time: 240
+        threads: 1
+        threads_sort: 2
+    cramtools:
+        mem: 4000
+        time: 300
+        threads: 1
+    simple_counting:
+        mem: 15000
+        time: 1440
+        mem_merge: 6000
+        time_merge: 240
+    prep_anno:
+        mem: 15000
+        time: 240
+    deseq:
+        mem: 1000
+        time: 240
+    diff:
+        mem: 1000
+        time: 240
+    limma:
+        threads: 3
+        mem: 1000
+    hypoxia:
+        threads: 1
+        mem: 1000
+        time: 240
+    hypoxia_plot:
+        call: "scripts/hypoxia_plots/hypoxia_plots.r"
+        threads: 1
+        mem: 1000
+        time: 60
+    htseq:
+        call: "htseq-count"
+        scratch: 8000
+        mem: 8000
+        time: 1440
+        threads: 8
+    picard:
+        CollectRnaSeqMetrics: 
+                scratch: 12000
+                mem: 8000
+                time: 120
+                threads: 8
+    RSEM_calc_expr:
+        call: "rsem-calculate-expression"
+        scratch: 10000
+        mem: 12000
+        time: 2000
+        threads: 4
+        variousParams: "--strandedness reverse --paired-end --estimate-rspd "
+    convert-sam-for-rsem:      
+        call: "convert-sam-for-rsem"
+        scratch: 10000
+        mem: 12000
+        time: 200
+        threads: 4
+    normalize_gene_quant:
+        call: "perl scripts/tcga_boxplot/quartile_norm.pl"
+        scratch: 2000
+        mem: 2000
+        time: 200
+        threads: 1
+        variousParams: "-c 5 -q 75"
+    change_header:
+        call: "sed"
+        scratch: 2000
+        mem: 2000
+        time: 200
+        threads: 1
+    filter_genes:
+        call: "python scripts/tcga_boxplot/filter_genes.py"
+        scratch: 2000
+        mem: 2000
+        time: 200
+        threads: 1
+    parse_cohort_comparison:
+        call: "Rscript --vanilla scripts/tcga_boxplot/parse_rna_tcga_pat_data.r"
+        scratch: 2000
+        mem: 2000
+        time: 200
+        threads: 4
+        cohort: "resources/tcga_boxplot/SKCM.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt"
+    boxplot_expression_value:
+        call: "scripts/tcga_boxplot/variant_expression_context.TCGA.list_of_genes.R"
+        scratch: 2000
+        mem: 2000
+        time: 200
+        threads: 4
+        cohort: "resources/tcga_boxplot/SKCM.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt" 
+    burden:
+        globsum: [1, 5, 10, 20]
+        mem: 20000
+        time: 1440
+    burden_plot:
+        mem: 2000
+        time: 15
+    rseqc:
+        bamstat:
+            call: "bam_stat.py"
+            threads: 8
+            mem: 2000
+            time: 120
+            scratch: 12000
+        readGC:
+            call: "read_GC.py"
+            threads: 8
+            mem: 2000
+            time: 120
+            scratch: 12000
+        geneBodyCoverage:
+            call: "geneBody_coverage.py "
+            threads: 8
+            mem: 12000
+            time: 500
+            scratch: 12000
+    plots_stats:
+        mem: 2000
+        time: 100
+        scratch: 2000
+        threads: 8
+        gc_plot: "scripts/qc_plots/gc_plot.r"
+        generate_readStats: "scripts/qc_plots/generate_readStats_table.SE.py"
+        genebody_coverage:  "scripts/qc_plots/gene_body_coverage.r"
+    qorts:
+        call: "qorts -Xmx10G"
+        threads: 8
+        mem: 50000
+        time: 300
+        scratch: 12000
+        plot: "scripts/qc_plots/qorts_genebody_coverage.r"

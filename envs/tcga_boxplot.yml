@@ -1,0 +1,13 @@
+name: wf_rna_seq
+channels:
+    - bioconda
+    - conda-forge
+    - r
+    - default
+dependencies:
+    - pip >=19.0 
+    - python =3.6
+    - pandas =0.24.2
+    - snakemake =5.4.4 
+    - r-base>=3.5.1
+

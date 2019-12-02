@@ -1,0 +1,7 @@
+--SKCM.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt
+    The file is the data from TCGA that we are comparing to and can be downloaded from https://gdac.broadinstitute.org/ Skin Cutaneous Melanoma > Browse (in Data column) > "mRNASeq Analyses" > illuminahiseq_rnaseqv2-RSEM_genes_normalized
+    In order for the file to be compatible with our pipeline you need to a) delete the second row of the file and b) after that rename the first column from “Hybridization REF” to “gene_id”.
+
+--genes_of_interest.txt 
+ This csv file has the HUGO symbols of our lab's genes of interest which Ximena has passed and the ENSEMBL_ID which the user has to enter inroder for the tcga_boxplot scripts to work.
+ If a user is interested in tcga boxplot of addtional genes, they need to add the HUGO symbol and ENDEML_ID in a comma separated format
