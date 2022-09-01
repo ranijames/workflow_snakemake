@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 ## Purpose: Script makes boxplot of hypoxia scores of TCGA, TCGA normal and GTEX with all the cancer types (with the cancer type of interes at the far left) and marks the hypoxia score of sample of interest with  a red line:
 ##
-## Author: Ximena/Tinu Thomas
+## Author: Alva James/Tinu Thomas
 ##
 ## Manual
 ## ------
